@@ -57,6 +57,11 @@ public  class Invocation implements Serializable {
     public Invocation(String methodName, Object[] parameters) {
         this.methodName = methodName;
         this.parameters = parameters;
+        parameterClasses = new Class[parameters.length];
+        int i = 0;
+        for (Object o : parameters) {
+            parameterClasses[i++] = o.getClass();
+        }
     }
 
     public Class[] getParameterClasses() throws ClassNotFoundException {
