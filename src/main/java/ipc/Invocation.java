@@ -1,4 +1,4 @@
-package rpc;
+package ipc;
 
 
 import java.io.Serializable;
@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * 调用信息的封装类
  */
-public  class Invocation implements Serializable {
+public class Invocation implements Serializable {
     // 方法名称
     private String methodName;
     // 调用参数，空数组跟null一致
@@ -22,7 +22,8 @@ public  class Invocation implements Serializable {
 
     static class GetClassByName {
         // 基本数据类型无法Class.forname,需要单独处理
-        private static  final Map<String, Class<?>> WARP_TO_PRIMITIVE = new HashMap<>();
+        private static final Map<String, Class<?>> WARP_TO_PRIMITIVE = new HashMap<>();
+
         static {
             WARP_TO_PRIMITIVE.put("int", Integer.TYPE);
             WARP_TO_PRIMITIVE.put("long", Long.TYPE);
@@ -33,8 +34,13 @@ public  class Invocation implements Serializable {
             WARP_TO_PRIMITIVE.put("double", Double.TYPE);
             WARP_TO_PRIMITIVE.put("char", Character.TYPE);
         }
-         static Class<?> getClassByName(String className) throws ClassNotFoundException {
-            return WARP_TO_PRIMITIVE.getOrDefault(className, Class.forName(className));
+
+        static Class<?> getClassByName(String className) throws ClassNotFoundException {
+            if (WARP_TO_PRIMITIVE.containsKey(className)) {
+                return WARP_TO_PRIMITIVE.get(className);
+            } else {
+                return Class.forName(className);
+            }
         }
     }
 
