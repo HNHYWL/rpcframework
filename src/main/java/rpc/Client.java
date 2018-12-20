@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package ipc;
+package rpc;
 
 import java.net.Socket;
 import java.net.InetSocketAddress;

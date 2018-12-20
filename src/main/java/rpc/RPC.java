@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-package ipc;
+package rpc;
 
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 
@@ -33,8 +32,6 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
-import javax.security.auth.Subject;
-import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.*;
 
@@ -269,7 +266,7 @@ public class RPC {
     /**
      * An RPC Server.
      */
-    public static class Server extends ipc.Server {
+    public static class Server extends rpc.Server {
         private Object instance;
         private boolean verbose;
         private boolean authorize = false;
@@ -323,13 +320,8 @@ public class RPC {
                 method.setAccessible(true);
 
                 long startTime = System.currentTimeMillis();
-                System.out.println("\n\n\n\nnew call --------\n"+call );
-                LOG.info("instace calss:" + instance.getClass());
-                //TimeUnit.SECONDS.sleep(5);
-
                 Object value = method.invoke(instance, call.getParameters());
 
-                System.out.println("=======" + value);
 
                 int processingTime = (int) (System.currentTimeMillis() - startTime);
                 int qTime = (int) (startTime - receivedTime);

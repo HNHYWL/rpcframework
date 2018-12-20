@@ -15,24 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package ipc;
-
-import java.io.IOException;
+package rpc;
 
 /**
- * Superclass of all protocols that use Hadoop RPC.
- * Subclasses of this interface are also supposed to have
- * a static final long versionID field.
+ * Status of a Hadoop IPC call.
  */
-public interface VersionedProtocol {
+enum Status {
+  SUCCESS (0),
+  ERROR (1),
+  FATAL (-1);
   
-  /**
-   * Return protocol version corresponding to protocol interface.
-   * @param protocol The classname of the protocol interface
-   * @param clientVersion The version of the protocol that the client speaks
-   * @return the version that the server will speak
-   */
-  public long getProtocolVersion(String protocol,
-                                 long clientVersion) throws IOException;
+  int state;
+  private Status(int state) {
+    this.state = state;
+  }
 }

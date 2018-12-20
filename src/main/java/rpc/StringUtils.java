@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package ipc;
+package rpc;
 
 
 import java.io.PrintWriter;

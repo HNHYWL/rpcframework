@@ -1,4 +1,4 @@
-package ipc;
+package rpc;
 
 import org.apache.log4j.Logger;
 

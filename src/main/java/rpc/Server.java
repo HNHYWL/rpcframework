@@ -16,12 +16,10 @@
  * limitations under the License.
  */
 
-package ipc;
+package rpc;
 
 import java.io.IOException;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import java.nio.ByteBuffer;
@@ -42,8 +40,6 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -944,8 +940,11 @@ public abstract class Server {
             ByteArrayOutputStream buf = new ByteArrayOutputStream(10240);
             while (running) {
                 try {
-                    final Call call = callQueue.take(); // pop the queue; maybe blocked here
 
+                    final Call call = callQueue.take(); // pop the queue; maybe blocked here
+                    //TimeUnit.SECONDS.sleep(1);
+                    LOG.info("\n\n\n=======thie handler is: " + this.getName() + " and the call id is: "
+                            + call.id + " and callqueue len is: " + callQueue.size());
                     if (LOG.isDebugEnabled())
                         LOG.debug(getName() + ": has #" + call.id + " from " + call.connection);
 
