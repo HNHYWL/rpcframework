@@ -561,7 +561,6 @@ public class Client {
         this.maxRetries = 10;
         this.tcpNoDelay = false;
         this.pingInterval = 60000;
-        LOG.error("ping interval is = " + this.pingInterval);
         if (LOG.isDebugEnabled()) {
             LOG.debug("The ping interval is" + this.pingInterval + "ms.");
         }
