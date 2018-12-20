@@ -11,14 +11,16 @@ import java.net.InetSocketAddress;
 
 public class Client extends Thread {
     private static Logger logger = Logger.getLogger(Client.class);
+
     public static void main(String[] args) throws Exception {
-        MyProtocol client = (MyProtocol) RPC.getProxy(MyProtocol.class, 3,
+        MyProtocol client = (MyProtocol) RPC.getProxy(MyProtocol.class,
+                3,
                 new InetSocketAddress("localhost", 8888),
                 SocketFactory.getDefault());
 
 
         for (int i = 1; i < 20; i++) {
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
                     while (true) {
@@ -32,7 +34,7 @@ public class Client extends Thread {
         }
 
 
-
+        //RPC.stopProxy(client);
 
     }
 }

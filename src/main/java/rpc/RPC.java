@@ -1,20 +1,3 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package rpc;
 
@@ -23,13 +6,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 
-import java.net.ConnectException;
 import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
 import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import javax.net.SocketFactory;
 
@@ -81,28 +61,26 @@ public class RPC {
 
     private static ClientCache CLIENTS = new ClientCache();
 
+    /**
+     * 动态代理的InvocationHandler
+     */
     private static class Invoker implements InvocationHandler {
         private InetSocketAddress address;
         private Client client;
         private boolean isClosed = false;
 
-        public Invoker(InetSocketAddress address,
-                       SocketFactory factory) {
+        public Invoker(InetSocketAddress address, SocketFactory factory) {
             this.address = address;
-
             this.client = CLIENTS.getClient(factory);
         }
 
-        public Object invoke(Object proxy, Method method, Object[] args)
-                throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             final boolean logDebug = LOG.isDebugEnabled();
             long startTime = 0;
             if (logDebug) {
                 startTime = System.currentTimeMillis();
             }
-
-            Object value =  client.call(new Invocation(method, args), address,
-                    method.getDeclaringClass());
+            Object value = client.call(new Invocation(method, args), address, method.getDeclaringClass());
             if (logDebug) {
                 long callTime = System.currentTimeMillis() - startTime;
                 LOG.debug("Call: " + method.getName() + " " + callTime);
@@ -120,6 +98,7 @@ public class RPC {
     }
 
     /**
+     * rpc版本检查异常
      * A version mismatch for the RPC protocol.
      */
     public static class VersionMismatch extends IOException {
@@ -127,13 +106,7 @@ public class RPC {
         private long clientVersion;
         private long serverVersion;
 
-        /**
-         * Create a version mismatch exception
-         *
-         * @param interfaceName the name of the protocol mismatch
-         * @param clientVersion the client's version of the protocol
-         * @param serverVersion the server's version of the protocol
-         */
+
         public VersionMismatch(String interfaceName, long clientVersion,
                                long serverVersion) {
             super("Protocol " + interfaceName + " version mismatch. (client = " +
@@ -142,84 +115,10 @@ public class RPC {
             this.clientVersion = clientVersion;
             this.serverVersion = serverVersion;
         }
-
-        /**
-         * Get the interface name
-         *
-         * @return the java class name
-         * (eg. org.apache.hadoop.mapred.InterTrackerProtocol)
-         */
-        public String getInterfaceName() {
-            return interfaceName;
-        }
-
-        /**
-         * Get the client's preferred version
-         */
-        public long getClientVersion() {
-            return clientVersion;
-        }
-
-        /**
-         * Get the server's agreed to version.
-         */
-        public long getServerVersion() {
-            return serverVersion;
-        }
-    }
-
-    public static VersionedProtocol waitForProxy(Class protocol,
-                                                 long clientVersion,
-                                                 InetSocketAddress addr
-    ) throws IOException {
-        return waitForProxy(protocol, clientVersion, addr, Long.MAX_VALUE);
     }
 
     /**
-     * Get a proxy connection to a remote server
-     *
-     * @param protocol      protocol class
-     * @param clientVersion client version
-     * @param addr          remote address
-     * @param timeout       time in milliseconds before giving up
-     * @return the proxy
-     * @throws IOException if the far end through a RemoteException
-     */
-    static VersionedProtocol waitForProxy(Class protocol,
-                                          long clientVersion,
-                                          InetSocketAddress addr,
-                                          long timeout
-    ) throws IOException {
-        long startTime = System.currentTimeMillis();
-        IOException ioe;
-        while (true) {
-            try {
-                return getProxy(protocol, clientVersion, addr, SocketFactory.getDefault());
-            } catch (ConnectException se) {  // namenode has not been started
-                LOG.info("Server at " + addr + " not available yet, Zzzzz...");
-                ioe = se;
-            } catch (SocketTimeoutException te) {  // namenode is busy
-                LOG.info("Problem connecting to server: " + addr);
-                ioe = te;
-            }
-            // check if timed out
-            if (System.currentTimeMillis() - timeout >= startTime) {
-                throw ioe;
-            }
-
-            // wait for retry
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ie) {
-                // IGNORE
-            }
-        }
-    }
-
-
-    /**
-     * Construct a client-side proxy object that implements the named protocol,
-     * talking to a server at the named address.
+     * 生成远程代理对象
      */
     public static VersionedProtocol getProxy(Class<?> protocol,
                                              long clientVersion,
@@ -229,24 +128,15 @@ public class RPC {
         VersionedProtocol proxy = (VersionedProtocol) Proxy.newProxyInstance(
                 protocol.getClassLoader(),
                 new Class[]{protocol},
-                new Invoker(addr,factory));
+                new Invoker(addr, factory));
 
+        // 连接上的第一次方法调用，获取服务端的版本号，与本地指定的cliet版本号对比
         long serverVersion = proxy.getProtocolVersion(protocol.getName(), clientVersion);
+
         if (serverVersion == clientVersion) {
             return proxy;
         } else {
             throw new VersionMismatch(protocol.getName(), clientVersion, serverVersion);
-        }
-    }
-
-    static void showSeconds() {
-        for (int i = 0; i < 1000; i++) {
-            LOG.error("seconds:" + i);
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -268,28 +158,6 @@ public class RPC {
      */
     public static class Server extends rpc.Server {
         private Object instance;
-        private boolean verbose;
-        private boolean authorize = false;
-
-        /**
-         * Construct an RPC server.
-         *
-         * @param instance    the instance whose methods will be called
-         * @param bindAddress the address to bind on to listen for connection
-         * @param port        the port to listen for connections on
-         */
-        public Server(Object instance,String bindAddress, int port)
-                throws IOException {
-            this(instance,bindAddress, port, 1);
-        }
-
-        private static String classNameBase(String className) {
-            String[] names = className.split("\\.", -1);
-            if (names == null || names.length == 0) {
-                return className;
-            }
-            return names[names.length - 1];
-        }
 
         /**
          * Construct an RPC server.
@@ -301,8 +169,7 @@ public class RPC {
          */
         public Server(Object instance, String bindAddress, int port,
                       int numHandlers) throws IOException {
-            super(bindAddress, port, Invocation.class, numHandlers,
-                    classNameBase(instance.getClass().getName()));
+            super(bindAddress, port, Invocation.class, numHandlers);
             this.instance = instance;
 
         }
@@ -311,9 +178,7 @@ public class RPC {
         public Object call(Class<?> protocol, Invocation param, long receivedTime)
                 throws IOException {
             try {
-                Invocation call =  param;
-                if (verbose) log("Call: " + call);
-
+                Invocation call = param;
 
                 Method method = protocol.getMethod(call.getMethodName(),
                         call.getParameterClasses());
@@ -330,9 +195,6 @@ public class RPC {
                             " queueTime= " + qTime +
                             " procesingTime= " + processingTime);
                 }
-
-                if (verbose) log("Return: " + value);
-
                 return value;
 
             } catch (InvocationTargetException e) {
@@ -354,16 +216,19 @@ public class RPC {
 
     }
 
+    /**
+     * 获取服务端实例
+     * @param instance
+     * @param bindAddress
+     * @param port
+     * @param numHandlers
+     * @return
+     * @throws IOException
+     */
     public static Server getServer(final Object instance, final String bindAddress, final int port,
                                    final int numHandlers)
             throws IOException {
         return new Server(instance, bindAddress, port, numHandlers);
     }
 
-
-    private static void log(String value) {
-        if (value != null && value.length() > 55)
-            value = value.substring(0, 55) + "...";
-        LOG.info(value);
-    }
 }
