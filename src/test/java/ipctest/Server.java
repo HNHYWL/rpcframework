@@ -5,6 +5,8 @@ import rpc.ConnectionHeader;
 import rpc.RPC;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 public class Server {
     private static Logger logger = Logger.getLogger(Server.class);
@@ -26,6 +28,11 @@ public class Server {
         public Person getPerson(String name, int age) {
             logger.info("\n\ninvoke both name and age -----");
             return new Person(name, age);
+        }
+
+        @Override
+        public List<String> getList(String name) {
+            return Arrays.asList(name, "jkdi");
         }
 
         @Override

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.DataOutputStream;
 import java.io.ByteArrayOutputStream;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
@@ -996,6 +997,7 @@ public abstract class Server {
 
         ConnectionHeader header = new ConnectionHeader();
         Class<?> protocol;
+        BigInteger bigInteger = new BigInteger("jdi");
 
         Subject user = null;
 
