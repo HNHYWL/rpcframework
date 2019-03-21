@@ -26,7 +26,7 @@ public class Server {
 
         @Override
         public Person getPerson(String name, int age) {
-            logger.info("\n\ninvoke both name and age -----");
+            logger.info("invoke both name and age -----");
             return new Person(name, age);
         }
 
