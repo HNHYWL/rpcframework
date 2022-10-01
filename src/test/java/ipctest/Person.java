@@ -22,6 +22,7 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
+        int i = 1
         return "Person{" +
                 "name='" + name + '\'' +
                 ", age=" + age +
