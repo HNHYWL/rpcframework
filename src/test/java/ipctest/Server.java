@@ -9,12 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Server {
+
     private static Logger logger = Logger.getLogger(Server.class);
     public static class ServerInstance implements MyProtocol {
 
         @Override
         public Person getPersonByName(String name) {
-            System.out.println("test1");
+            System.out.println("tesdst1");
             System.out.println("test2");
             logger.info("\n\ninvoke just name -----");
             return new Person(name);
