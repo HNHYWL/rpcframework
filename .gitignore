@@ -9,6 +9,7 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
  1
+ skd
 # Compiled class files
 *.class
  
