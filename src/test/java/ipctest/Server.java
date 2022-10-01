@@ -14,6 +14,7 @@ public class Server {
 
         @Override
         public Person getPersonByName(String name) {
+            System.out.println("test1");
             logger.info("\n\ninvoke just name -----");
             return new Person(name);
         }
